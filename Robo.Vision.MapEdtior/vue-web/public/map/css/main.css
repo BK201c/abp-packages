@@ -1,0 +1,97 @@
+.stage_header {
+  font-size: 40px;
+  font-family: '微软雅黑';
+  text-align: center;
+}
+body {
+  background-color: aliceblue;
+}
+
+.all {
+  position: absolute;
+  z-index: 9999;
+  overflow: visible;
+  bottom: 50px;
+  right: 0;
+  display: inline-grid;
+}
+
+.box {
+  display: inline-block;
+  clear: both;
+}
+
+.card {
+  position: relative;
+  padding: 6px 20px 6px 20px;
+  margin: 8px;
+  x-box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.5);
+  box-shadow: 8px 0 8px -8px rgba(0, 0, 0, 0.5);
+  background: #fff;
+  transition: all 0.3s ease-in-out 0.1s;
+}
+
+.card-content {
+  color: #fff;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.bg-01 {
+  background: #539770;
+}
+
+.bg-02 {
+  background: #4b7d74;
+}
+
+.bg-03 {
+  background: #8dc2bc;
+}
+
+.bg-04 {
+  background: #e2ae63;
+}
+.bg-05 {
+  background: #e28663;
+}
+.zoulang {
+  margin-left: 20px;
+  padding: 0 10px;
+  font-size: 20px;
+  font-weight: 300;
+  display: none;
+  position: absolute;
+  left: 12%;
+  top: 40%;
+}
+
+.legend-list {
+  padding: 15px;
+  position: absolute;
+  z-index: 9999;
+  right: 10px;
+  top: 10px;
+  background: #f3f3f3;
+  width: 345px;
+}
+.legend-list ul {
+  padding: 10px;
+  display: none;
+  grid-template-columns: repeat(3, 100px);
+  -ms-grid-columns: repeat(3, 100px);
+  border-radius: 3px;
+  gap: 20px;
+  width: 345px;
+}
+
+.legend-list h2 {
+  font-size: 20px;
+  border-bottom: 1px solid #d5d5d5;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+}
+.legend-list span {
+  margin-left: 5px;
+}

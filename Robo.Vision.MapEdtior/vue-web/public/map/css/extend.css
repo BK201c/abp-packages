@@ -1,0 +1,107 @@
+/* .stacker-items {
+  transition: all 1s ease;
+} */
+
+/* 布局样式 */
+.change-floor-btn:hover,
+.opera-btn .btns:hover {
+  cursor: pointer;
+}
+
+.biao-btn {
+  background: #e28663;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+}
+
+/* 设备字体 */
+.dev-main {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dev-code {
+  font-size: 12px;
+  font-weight: 600;
+  color: #000;
+  position: relative;
+  /* display: none; */
+}
+/* 标注样式 */
+.label-center {
+  background-color: #fff;
+  color: #000;
+}
+
+/* 按钮区 */
+.opera-btn {
+  position: fixed;
+  bottom: 220px;
+  right: 5px;
+  z-index: 99;
+}
+
+.area-text-box {
+  border: 3px solid #03a9f4;
+}
+
+.area-text-box .title {
+  font-size: 26px;
+  font-weight: 600;
+}
+
+/* 禁用样式 */
+.disabled-device {
+  filter: grayscale(100%);
+}
+
+.cov-main {
+  border: 2px solid #fff;
+  box-sizing: border-box;
+  background-size: contain;
+}
+
+.icon-arrow-center {
+  display: none;
+}
+.icon-arrow-left {
+  width: 0;
+  border-width: 7px;
+  border-style: solid;
+  border-color: #0000 black transparent transparent;
+  position: absolute;
+  right: -8px;
+  top: 0;
+}
+.icon-arrow-right {
+  width: 0;
+  border-width: 7px;
+  border-style: solid;
+  border-color: transparent transparent transparent black;
+  position: absolute;
+  left: -7px;
+  top: 0;
+}
+.icon-arrow-top {
+  width: 0;
+  border-width: 7px;
+  border-style: solid;
+  border-color: #0000 transparent black transparent;
+  position: absolute;
+  left: 7px;
+  bottom: -12px;
+}
+.icon-arrow-bottom {
+  width: 0;
+  border-width: 7px;
+  border-style: solid;
+  border-color: #000 transparent transparent transparent;
+  position: absolute;
+  left: 7px;
+  top: -9px;
+}

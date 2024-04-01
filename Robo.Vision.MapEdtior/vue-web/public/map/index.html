@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./lib/layui/layui.css" />
+    <link rel="stylesheet" href="./lib/layui/layer.css" />
+    <link rel="stylesheet" href="./css/main.css" />
+    <link rel="stylesheet" href="./css/extend.css" />
+    <script type="text/javascript" src="./lib/layui/jquery.min.js"></script>
+    <script type="text/javascript" src="./lib/panzoom.min.js"></script>
+    <script type="text/javascript" src="./lib/lodash.min.js"></script>
+    <script type="text/javascript" src="./lib/layui/jquery.transit.js"></script>
+    <script type="text/javascript" src="./lib/layui/layer.js"></script>
+    <script type="text/javascript" src="./lib/ws/signalr.min.js"></script>
+    <script type="text/javascript" src="./js/stacker.js"></script>
+    <script type="text/javascript" src="./js/convey.js"></script>
+    <script type="text/javascript" src="./js/coder.js"></script>
+    <script type="text/javascript" src="./js/hoist.js"></script>
+    <script type="text/javascript" src="./js/discharge.js"></script>
+    <script type="text/javascript" src="./js/rgv.js"></script>
+    <script type="text/javascript" src="./js/common.js"></script>
+    <script type="text/javascript" src="./extend/extend-main.js"></script>
+    <script type="text/javascript" src="./extend/extend-convert.js"></script>
+    <script type="text/javascript" src="./extend/extend-service.js"></script>
+    <script type="text/javascript" src="./extend/extend-api.js"></script>
+    <script type="text/javascript" src="./extend/extend-draw.js"></script>
+    <title>WCS监控</title>
+  </head>
+
+  <body style="position: relative">
+    <fieldset
+      class="layui-elem-field layui-field-title"
+      id="f1"
+      style="position: absolute; width: 100%; z-index: 9999"
+    >
+      <legend class="stage_header" id="floorTitle">
+        <span>设备监控系统</span>
+      </legend>
+    </fieldset>
+
+    <div class="all" id="floorBtnList"></div>
+
+    <div class="opera-btn">
+      <div class="box">
+        <div class="bg-05 biao-btn active" id="statusChangeBtn">
+          <span class="card-content btns">标注</span>
+        </div>
+      </div>
+    </div>
+    <div class="legend-list" id="legend-list">
+      <h2>
+        <span>图例</span>
+        <span id="legendChangeBtn">
+          <svg
+            t="1675240084149"
+            class="icon"
+            viewBox="0 0 1024 1024"
+            version="1.1"
+            xmlns="http://www.w3.org/2000/svg"
+            p-id="2849"
+            width="32"
+            height="32"
+          >
+            <path
+              d="M65.582671 288.791335l446.417329 446.41733 446.417329-446.41733z"
+              p-id="2850"
+            ></path>
+          </svg>
+        </span>
+      </h2>
+      <ul id="legend-list-body">
+        <li><img src="./images/ulink.png" alt="" /><span>设备未连接</span></li>
+        <li><img src="./images/link.png" alt="" /><span>设备已连接</span></li>
+        <li>
+          <img style="width: 25px" src="./images/icon_alert.png" alt="" /><span>设备异常</span>
+        </li>
+        <li><img style="width: 25px" src="./images/stacker_1.png" alt="" /><span>堆垛机</span></li>
+        <li><img style="width: 25px" src="./images/tray_2.png" alt="" /><span>托盘</span></li>
+        <li><img style="width: 25px" src="./images/convey_2.png" alt="" /><span>输送线</span></li>
+        <li><img style="width: 25px" src="./images/rgv_1.png" alt="" /><span>RGV小车</span></li>
+
+        <li><img style="width: 25px" src="./images/cangwei.png" alt="" /><span>货位</span></li>
+        <li>
+          <img style="width: 25px" src="./images/rgv_track_1.png" alt="" /><span>RGV轨道</span>
+        </li>
+        <li><img style="width: 25px" src="./images/coder.png" alt="" /><span>叠盘机</span></li>
+        <li><img style="width: 25px" src="./images/box_water.png" alt="" /><span>水箱</span></li>
+        <li><img style="width: 25px" src="./images/hoist.png" alt="" /><span>提升机</span></li>
+        <li><img style="width: 25px" src="./images/discharge.png" alt="" /><span>拆盘机</span></li>
+        <li><img style="width: 25px" src="./images/bcr_1.png" alt="" /><span>扫码器</span></li>
+      </ul>
+    </div>
+    <div id="panzoom">
+      <div id="zd_map" style="position: relative; height: 100vh; background-color: #f0f8ff"></div>
+    </div>
+    <script>
+      var mapAllData = {}
+      var originalData = {}
+      var currentFloor = 1
+      var currrentMapData = ''
+      var tips = [1, 'rgba(0,0,0,0.7)']
+      function receiveData(baseUrl) {
+        $(function () {
+          //锚点跳转滑动效果
+          $('.card a').click(function () {
+            $('html, body').animate(
+              { scrollTop: $($(this).attr('href')).offset().top - 20 + 'px' },
+              1000
+            )
+            return false
+          })
+          const element = document.getElementById('zd_map')
+          const panzoom = Panzoom(element, {})
+          panzoom.zoom(0.8)
+
+          const element2 = document.getElementById('legend-list')
+          Panzoom(element2, {})
+
+          const parent = element.parentElement
+          parent.addEventListener('wheel', panzoom.zoomWithWheel)
+        })
+
+        $(document).ready(function () {
+          $.ajax({
+            url: `${baseUrl}/api/app/map-data`,
+            success: function (res) {
+              res.items.forEach((e) => {
+                Object.assign(mapAllData, { [e.id]: generateCode(e.mapJsonStr) })
+                Object.assign(originalData, { [e.id]: e })
+              })
+              currentFloor = res.items[0].id
+              const mapServiceUrl =
+                res.items.filter((e) => e.mapServiceUrl !== '')[0]?.mapServiceUrl || ''
+              var layerTitle = originalData[currentFloor].mapName || '设备监控系统'
+              document.getElementById('floorTitle').innerText = layerTitle
+              currrentMapData = mapAllData[currentFloor]
+              mapDataToScene(currrentMapData)
+              addFloorBtnList(mapAllData, originalData)
+              $('#floorBtnList .change-floor-btn').click(function () {
+                currentFloor = $(this).attr('data-floor')
+                $('#zd_map').empty()
+                $('#floorTitle').text(originalData[currentFloor].mapName)
+                mapDataToScene(mapAllData[currentFloor])
+              })
+              if (mapServiceUrl !== '') {
+                // 开启刷新
+                startUpdate(mapServiceUrl)
+              }
+            }
+          })
+        })
+
+        $('#statusChangeBtn').on('click', function () {
+          if ($(this).hasClass('active')) {
+            $('.dev-code').css('display', 'none')
+            $(this).removeClass('active').css('background', '#afafaf')
+          } else {
+            $('.dev-code').css('display', 'block')
+            $(this).addClass('active').css('background', '#e28663')
+          }
+        })
+
+        $('#legendChangeBtn').on('click', function () {
+          if ($(this).hasClass('active')) {
+            $('#legend-list-body').css('display', 'none')
+            $(this).removeClass('active')
+          } else {
+            $('#legend-list-body').css('display', 'grid')
+            $(this).addClass('active')
+          }
+        })
+
+        $('#AreaChangeBtn').on('click', function () {
+          if ($(this).hasClass('active')) {
+            $('.area-text-box').css('display', 'none')
+            $(this).removeClass('active')
+          } else {
+            $('.area-text-box').css('display', 'block')
+            $(this).addClass('active')
+          }
+        })
+      }
+    </script>
+  </body>
+</html>

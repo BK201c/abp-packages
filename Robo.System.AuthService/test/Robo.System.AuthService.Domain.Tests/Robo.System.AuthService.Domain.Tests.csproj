@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <RootNamespace>Robo.System.AuthService</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Robo.System.AuthService.Domain\Robo.System.AuthService.Domain.csproj" />
+    <ProjectReference Include="..\Robo.System.AuthService.TestBase\Robo.System.AuthService.TestBase.csproj" />
+  </ItemGroup>
+
+</Project>

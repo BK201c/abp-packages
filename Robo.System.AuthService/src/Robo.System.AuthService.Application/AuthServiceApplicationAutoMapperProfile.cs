@@ -12,9 +12,7 @@ public class AuthServiceApplicationAutoMapperProfile : Profile
          * into multiple profile classes for a better organization. */
         CreateMap<Menu, MenuDto>();
         CreateMap<CreateUpdateMenuDto, Menu>();
-
         CreateMap<MenuGrant,MenuGrantDto>();
         CreateMap<CreateUpdateMenuGrantDto, MenuGrant>();
 
     }
-}

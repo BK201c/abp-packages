@@ -6,14 +6,21 @@ namespace Robo.System.AuthService.Menus
 {
     public class CreateUpdateMenuDto
     {
-        public string GroupName { get; set; }
-        public string Name { get; set; }
-        public string ParentName { get; set; }
-        public string DisplayName { get; set; }
-        public int IsEnabled { get; set; }
-        public int MultiTenancySide { get; set; }
-        public string Providers { get; set; }
-        public string StateCheckers { get; set; }
-        public string ExtraProperties { get; set; }
+        public string? ParentId { get; set; }
+        public string? ParentPermissionCode { get; set; }
+        public string? ServiceIdentification { get; set; }
+        public string? PermissionCode { get; set; }
+        public string? PermissionName { get; set; }
+        public string? PermissionNameEn { get; set; }
+        public string? PermissionNameAlias { get; set; }
+        public int DelFlag { get; set; }
+        public int OrderNo { get; set; }
+        public string? PermissionType { get; set; }
+        public string? PermissionIcon { get; set; }
+        public string? PermissionDesc { get; set; }
+        public string? ClientRoute { get; set; }
+        public int KeepAliveFlag { get; set; }
+        public string? CreateBy { get; set; }
+        public string? UpdateBy { get; set; }
     }
 }

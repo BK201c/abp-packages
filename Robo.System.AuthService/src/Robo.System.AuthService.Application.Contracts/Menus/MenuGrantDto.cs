@@ -8,9 +8,9 @@ namespace Robo.System.AuthService.Menus
     public class MenuGrantDto : AuditedEntityDto<Guid>
 
     {
-        public string Name { get; set; }
-        public string ProviderName { get; set; }
-        public string ProviderKey { get; set; }
+        public string? Name { get; set; }
+        public string? ProviderName { get; set; }
+        public string? ProviderKey { get; set; }
 
     }
 }

@@ -21,10 +21,7 @@ namespace Robo.System.AuthService.Menus
             _menuRepository = repository;
         }
 
-        public async Task<List<MenuDto>> GetAllMenu()
-        {
-            return await _menuRepository.GetListAsync();
-        }
+ 
     }
 
 }

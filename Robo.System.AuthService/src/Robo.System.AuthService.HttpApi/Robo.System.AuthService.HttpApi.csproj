@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Robo.System.AuthService.Application.Contracts\Robo.System.AuthService.Application.Contracts.csproj" />
+    <ProjectReference Include="..\Robo.System.AuthService.EntityFrameworkCore\Robo.System.AuthService.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>

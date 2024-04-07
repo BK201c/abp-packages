@@ -20,6 +20,11 @@ namespace Robo.System.AuthService.Controllers
             _dbContext = dbContext;
         }
 
+        /// <summary>
+        /// 添加权限菜单
+        /// </summary>
+        /// <param name="permission"></param>
+        /// <returns></returns>
         [HttpPost("AddPermission")]
         public async Task<IActionResult> AddPermission(Menu permission)
         {
@@ -34,7 +39,7 @@ namespace Robo.System.AuthService.Controllers
 
                 // 在权限组表中添加新记录
                 _dbContext.Menus.Add(permission);
-        
+
                 // 添加新权限到数据库
                 await _dbContext.SaveChangesAsync();
 
@@ -46,7 +51,12 @@ namespace Robo.System.AuthService.Controllers
             }
         }
 
-        [HttpDelete("DeletePermission/{permissionId}")]
+        /// <summary>
+        /// 删除权限菜单
+        /// </summary>
+        /// <param name="permissionId"></param>
+        /// <returns></returns>
+        [HttpGet("DeletePermission")]
         public async Task<IActionResult> DeletePermission(string permissionId)
         {
             try
@@ -96,8 +106,11 @@ namespace Robo.System.AuthService.Controllers
         }
 
 
+        /// <summary>
+        /// 获取所有权限
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("GetAllPermission")]
-        //获取所有权限
         public async Task<IActionResult> GetAllPermission()
         {
             try
@@ -111,8 +124,12 @@ namespace Robo.System.AuthService.Controllers
             }
         }
 
+        /// <summary>
+        /// 根据角色名称获取所有权限
+        /// </summary>
+        /// <param name="providerKey"></param>
+        /// <returns></returns>
         [HttpGet("GetPermissionByRole")]
-        //根据角色名称获取所有权限
         public async Task<IActionResult> GetPermissionByRole(string providerKey)
         {
             try
@@ -137,27 +154,31 @@ namespace Robo.System.AuthService.Controllers
         }
 
 
+        /// <summary>
+        /// 设置角色权限菜单
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns></returns>
         [HttpPost("SetPermissionByRole")]
-        //设置角色权限菜单
-        public async Task<IActionResult> SetPermissionByRole(string providerKey, List<string> permissionCodes)
+        public async Task<IActionResult> SetPermissionByRole(PermissionRoleDto query)
         {
             try
             {
                 var permissionsToAdd = await _dbContext.MenuGrants
-                    .Where(p => permissionCodes.Contains(p.Name))
+                    .Where(p => query.PermissionCodes.Contains(p.Name))
                     .ToListAsync();
 
-                // Remove existing permissions for the role
+                // 清空角色已有权限
                 var existingPermissions = await _dbContext.MenuGrants
-                    .Where(p => p.ProviderKey == providerKey)
+                    .Where(p => p.ProviderKey == query.ProviderKey)
                     .ToListAsync();
 
                 _dbContext.MenuGrants.RemoveRange(existingPermissions);
 
-                // Add new permissions for the role
+                // 添加新的权限
                 foreach (var permission in permissionsToAdd)
                 {
-                    permission.ProviderKey = providerKey;
+                    permission.ProviderKey = query.ProviderKey;
                 }
 
                 _dbContext.MenuGrants.AddRange(permissionsToAdd);
@@ -167,10 +188,15 @@ namespace Robo.System.AuthService.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"Failed to set permissions for role {providerKey}: {ex.Message}");
+                return BadRequest($"Failed to set permissions for role {query.ProviderKey}: {ex.Message}");
             }
         }
 
-
     }
+
+    public class PermissionRoleDto {
+        public string? ProviderKey { get; set; }
+        public List<string> PermissionCodes {  get; set; }
+    }
+
 }

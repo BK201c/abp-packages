@@ -91,18 +91,20 @@ public class AuthServiceDbContext :
         //    b.ConfigureByConvention(); //auto configure for the base class props
         //    //...
         //});
+
+        //role_menu表
         builder.Entity<MenuGrant>(b =>
         {
             b.ToTable("System_Menu_Grant");
 
             b.ConfigureByConvention();
 
-            b.Property(x => x.Name).HasMaxLength(256).IsRequired();
-            b.Property(x => x.ProviderName).HasMaxLength(PermissionGrantConsts.MaxProviderNameLength).IsRequired();
-            b.Property(x => x.ProviderKey).HasMaxLength(PermissionGrantConsts.MaxProviderKeyLength).IsRequired();
-            b.HasIndex(x => new { x.Name, x.ProviderName, x.ProviderKey });
+            b.Property(x => x.PermissionCode).HasMaxLength(256).IsRequired();
+            b.Property(x => x.RoleCode).HasMaxLength(PermissionGrantConsts.MaxProviderKeyLength).IsRequired();
+            b.HasIndex(x => new { x.PermissionCode, x.RoleCode });
         });
 
+        //menu表
         builder.Entity<Menu>(b =>
         {
             b.ToTable("System_Menu");
@@ -116,7 +118,7 @@ public class AuthServiceDbContext :
             b.Property(x => x.PermissionNameEn).HasComment("权限名称(英文)").HasMaxLength(512);
             b.Property(x => x.PermissionNameAlias).HasComment("权限名称(第三语言)").HasMaxLength(512);
             b.Property(x => x.DelFlag).HasComment("是否删除--0:未删除;1:已删除");
-            b.Property(x => x.PermissionType).HasComment("权限类型(模块module、菜单menu、按钮button)").HasMaxLength(50);
+            b.Property(x => x.PermissionType).HasComment("权限类型(应用app、模块module、页面page、按钮button)").HasMaxLength(50);
             b.Property(x => x.OrderNo).HasComment("权限顺序");
             b.Property(x => x.PermissionIcon).HasComment("权限标识，一般指图标").HasMaxLength(50);
             b.Property(x => x.PermissionDesc).HasComment("权限描述").HasMaxLength(500);
@@ -125,6 +127,7 @@ public class AuthServiceDbContext :
             b.Property(x => x.CreateBy).HasComment("创建人").HasMaxLength(100);
             b.Property(x => x.CreationTime).HasComment("创建时间").IsRequired();
             b.Property(x => x.UpdateBy).HasComment("更新人").HasMaxLength(100);
+            b.Property(x => x.LastModificationTime).HasComment("更新时间");
             b.Property(x => x.LastModificationTime).HasComment("更新时间");
   
             b.HasIndex(ou => ou.PermissionCode);

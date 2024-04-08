@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Robo.System.AuthService.Utils;
 using Robo.System.AuthService.EntityFrameworkCore;
 using Robo.System.AuthService.Menus;
 using System;
@@ -77,7 +78,7 @@ namespace Robo.System.AuthService.Controllers
         private async Task<List<Menu>> GetPermissionsToDelete(string permissionId)
         {
             var permissionsToDelete = await _dbContext.Menus
-                .Where(p => p.Id == Guid.Parse(permissionId) || p.ParentId == permissionId)
+                .Where(p => p.Id == Guid.Parse(permissionId) || p.ParentPermissionCode == permissionId)
                 .ToListAsync();
 
             foreach (var permission in permissionsToDelete.ToList())
@@ -91,7 +92,7 @@ namespace Robo.System.AuthService.Controllers
         private async Task<List<Menu>> GetChildPermissionsToDelete(Guid parentId)
         {
             var childPermissions = await _dbContext.Menus
-                .Where(p => Guid.Parse(p.ParentId) == parentId)
+                .Where(p => Guid.Parse(p.ParentPermissionCode) == parentId)
                 .ToListAsync();
 
             var permissionsToDelete = new List<Menu>();
@@ -107,7 +108,7 @@ namespace Robo.System.AuthService.Controllers
 
 
         /// <summary>
-        /// 获取所有权限
+        /// 获取所有权限树数据
         /// </summary>
         /// <returns></returns>
         [HttpGet("GetAllPermission")]
@@ -115,37 +116,91 @@ namespace Robo.System.AuthService.Controllers
         {
             try
             {
-                var permissions = await _dbContext.Menus.ToListAsync();
-                return Ok(permissions);
+                // 查询所有菜单数据
+                var allMenus = await _dbContext.Menus.ToListAsync();
+
+                // 构建以菜单ID为键的子菜单字典
+                var childMenusDictionary = allMenus
+                    .Where(m => !string.IsNullOrEmpty(m.ParentPermissionCode))
+                    .GroupBy(m => m.ParentPermissionCode)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
+                // 构建树结构
+                var rootMenus = BuildTree(allMenus, childMenusDictionary, null, null);
+
+                return Ok(Result<List<MenuItemDto>>.Success(rootMenus));
             }
             catch (Exception ex)
             {
-                return BadRequest($"Failed to retrieve permissions: {ex.Message}");
+                return BadRequest(Result<List<MenuItemDto>>.Failure($"Failed to retrieve permissions: {ex.Message}"));
             }
         }
 
+        // 构建树结构方法
+        private List<MenuItemDto> BuildTree(List<Menu> allMenus, Dictionary<string, List<Menu>> childMenusDictionary, Dictionary<Guid, string>? permissionCodesDictionary, string? parentPermissionCode)
+        {
+            if (!childMenusDictionary.TryGetValue(parentPermissionCode, out var childMenus))
+            {
+                return new List<MenuItemDto>();
+            }
+
+            return childMenus.Select(child =>
+            {
+                var menuDto = new MenuItemDto
+                {
+                    Id = child.Id,
+                    ParentId = child.ParentId,
+                    PermissionCode = child.PermissionCode,
+                    PermissionName = child.PermissionName,
+                    // 根据需要设置其他属性
+                    Children = BuildTree(allMenus, childMenusDictionary, permissionCodesDictionary, child.PermissionCode)
+                };
+
+                // 如果权限字典不为空，且当前菜单拥有权限，则设置权限标志
+                if (permissionCodesDictionary != null && permissionCodesDictionary.ContainsKey(child.Id))
+                {
+                    menuDto.HasPermission = true;
+                }
+
+                return menuDto;
+            }).ToList();
+        }
+
         /// <summary>
-        /// 根据角色名称获取所有权限
+        /// 根据角色名称获取所有权限，并以树结构返回数据
         /// </summary>
-        /// <param name="providerKey"></param>
+        /// <param name="roleCode"></param>
+        /// <param name="appName"></param>
         /// <returns></returns>
         [HttpGet("GetPermissionByRole")]
-        public async Task<IActionResult> GetPermissionByRole(string providerKey)
+        public async Task<IActionResult> GetPermissionByRole(string roleCode,string appName)
         {
             try
             {
                 // 从MenuGrants中查询角色拥有的所有权限名称
-                var permissionNames = await _dbContext.MenuGrants
-                    .Where(p => p.ProviderKey == providerKey)
-                    .Select(p => p.Name)
+                var permissionCodes = await _dbContext.MenuGrants
+                    .Where(p => p.RoleCode == roleCode)
+                    .Select(p => p.PermissionCode)
                     .ToListAsync();
 
-                // 根据权限名称查询对应的菜单数据
-                var permissions = await _dbContext.Menus
-                    .Where(m => permissionNames.Contains(m.PermissionCode))
-                    .ToListAsync();
+                // 查询所有菜单数据
+                var allMenus = await _dbContext.Menus.ToListAsync();
 
-                return Ok(permissions);
+                // 构建以菜单ID为键的子菜单字典
+                var childMenusDictionary = allMenus
+                    .Where(m => !string.IsNullOrEmpty(m.ParentPermissionCode))
+                    .GroupBy(m => m.ParentPermissionCode)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+
+                // 构建以菜单ID为键的权限字典
+                var permissionCodesDictionary = await _dbContext.Menus
+                    .Where(m => permissionCodes.Contains(m.PermissionCode))
+                    .ToDictionaryAsync(m => m.Id, m => m.PermissionCode);
+
+                // 获取根菜单列表
+                var rootMenus = BuildTree(allMenus, childMenusDictionary, permissionCodesDictionary, appName);
+
+                return Ok(rootMenus);
             }
             catch (Exception ex)
             {
@@ -165,12 +220,12 @@ namespace Robo.System.AuthService.Controllers
             try
             {
                 var permissionsToAdd = await _dbContext.MenuGrants
-                    .Where(p => query.PermissionCodes.Contains(p.Name))
+                    .Where(p => query.PermissionCodes.Contains(p.PermissionCode))
                     .ToListAsync();
 
                 // 清空角色已有权限
                 var existingPermissions = await _dbContext.MenuGrants
-                    .Where(p => p.ProviderKey == query.ProviderKey)
+                    .Where(p => p.RoleCode == query.RoleCode)
                     .ToListAsync();
 
                 _dbContext.MenuGrants.RemoveRange(existingPermissions);
@@ -178,7 +233,7 @@ namespace Robo.System.AuthService.Controllers
                 // 添加新的权限
                 foreach (var permission in permissionsToAdd)
                 {
-                    permission.ProviderKey = query.ProviderKey;
+                    permission.RoleCode = query.RoleCode;
                 }
 
                 _dbContext.MenuGrants.AddRange(permissionsToAdd);
@@ -188,15 +243,20 @@ namespace Robo.System.AuthService.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest($"Failed to set permissions for role {query.ProviderKey}: {ex.Message}");
+                return BadRequest($"Failed to set permissions for role {query.RoleCode}: {ex.Message}");
             }
         }
 
     }
 
     public class PermissionRoleDto {
-        public string? ProviderKey { get; set; }
-        public List<string> PermissionCodes {  get; set; }
+        public required string RoleCode { get; set; }
+        public required List<string> PermissionCodes {  get; set; }
+    }
+    
+    public class MenuItemDto:MenuDto {
+        public bool HasPermission { get; set; }
+        public required List<MenuItemDto> Children {  get; set; }
     }
 
 }

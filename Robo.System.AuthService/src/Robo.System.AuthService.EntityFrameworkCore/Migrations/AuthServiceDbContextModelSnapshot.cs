@@ -30,7 +30,6 @@ namespace Robo.System.AuthService.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ClientRoute")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)")
                         .HasComment("路径（菜单权限时使用）");
@@ -43,14 +42,12 @@ namespace Robo.System.AuthService.Migrations
                         .HasColumnName("ConcurrencyStamp");
 
                     b.Property<string>("CreateBy")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
                         .HasComment("创建人");
 
-                    b.Property<string>("CreationTime")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2")
                         .HasColumnName("CreationTime")
                         .HasComment("创建时间");
 
@@ -67,12 +64,15 @@ namespace Robo.System.AuthService.Migrations
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("ExtraProperties");
 
+                    b.Property<bool>("IsDisable")
+                        .HasColumnType("bit");
+
                     b.Property<int>("KeepAliveFlag")
                         .HasColumnType("int")
                         .HasComment("存活标识");
 
-                    b.Property<string>("LastModificationTime")
-                        .HasColumnType("nvarchar(max)")
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2")
                         .HasColumnName("LastModificationTime")
                         .HasComment("更新时间");
 
@@ -80,13 +80,15 @@ namespace Robo.System.AuthService.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("LastModifierId");
 
+                    b.Property<int>("Level")
+                        .HasColumnType("int");
+
                     b.Property<int>("OrderNo")
                         .HasColumnType("int")
                         .HasComment("权限顺序");
 
-                    b.Property<string>("ParentId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)")
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uniqueidentifier")
                         .HasComment("父级权限ID");
 
                     b.Property<string>("ParentPermissionCode")
@@ -102,49 +104,41 @@ namespace Robo.System.AuthService.Migrations
                         .HasComment("权限编号");
 
                     b.Property<string>("PermissionDesc")
-                        .IsRequired()
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)")
                         .HasComment("权限描述");
 
                     b.Property<string>("PermissionIcon")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
                         .HasComment("权限标识，一般指图标");
 
                     b.Property<string>("PermissionName")
-                        .IsRequired()
                         .HasMaxLength(512)
                         .HasColumnType("nvarchar(512)")
                         .HasComment("权限名称");
 
                     b.Property<string>("PermissionNameAlias")
-                        .IsRequired()
                         .HasMaxLength(512)
                         .HasColumnType("nvarchar(512)")
                         .HasComment("权限名称(第三语言)");
 
                     b.Property<string>("PermissionNameEn")
-                        .IsRequired()
                         .HasMaxLength(512)
                         .HasColumnType("nvarchar(512)")
                         .HasComment("权限名称(英文)");
 
                     b.Property<string>("PermissionType")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
-                        .HasComment("权限类型(模块module、菜单menu、按钮button)");
+                        .HasComment("权限类型(应用app、模块module、页面page、按钮button)");
 
                     b.Property<string>("ServiceIdentification")
-                        .IsRequired()
                         .HasMaxLength(512)
                         .HasColumnType("nvarchar(512)")
                         .HasComment("注册服务实例的前缀");
 
                     b.Property<string>("UpdateBy")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
                         .HasComment("更新人");
@@ -189,24 +183,19 @@ namespace Robo.System.AuthService.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("LastModifierId");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("PermissionCode")
                         .IsRequired()
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.Property<string>("ProviderKey")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<string>("ProviderName")
+                    b.Property<string>("RoleCode")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("nvarchar(64)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name", "ProviderName", "ProviderKey");
+                    b.HasIndex("PermissionCode", "RoleCode");
 
                     b.ToTable("System_Menu_Grant", (string)null);
                 });

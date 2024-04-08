@@ -9,10 +9,10 @@ namespace Robo.System.AuthService.Menus
 {
     public class Menu: AuditedAggregateRoot<Guid>
     {
-        public string? ParentId { get; set; }
-        public string? ParentPermissionCode { get; set; }
+        public Guid? ParentId { get; set; }
+        public required string ParentPermissionCode { get; set; }
         public string? ServiceIdentification { get; set; }
-        public string? PermissionCode { get; set; }
+        public required string PermissionCode { get; set; }
         public string? PermissionName { get; set; }
         public string? PermissionNameEn { get; set; }
         public string? PermissionNameAlias { get; set; }
